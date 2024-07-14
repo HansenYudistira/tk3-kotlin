@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.example.tk3.databinding.ActivityMapsBinding
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
@@ -76,6 +77,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                         position(LatLng(placeLat, placeLong))
                         title(placeName)
                     })
+                    val zoomLevel = 15f
+
+                    val latlng = LatLng(placeLat, placeLong)
+                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(latlng, zoomLevel))
+
                     binding?.btnSave?.setOnClickListener {
                         AddTask.open(context = this@MapsActivity,mode = EDIT, destinationId = destinationId, lat =  placeLat, long =  placeLong)
                     }

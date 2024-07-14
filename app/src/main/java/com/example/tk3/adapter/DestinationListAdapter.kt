@@ -36,7 +36,7 @@ class DestinationListAdapter(destinationlist: List<DestinationListModel>, intern
     override fun onBindViewHolder(holder: DestinationViewHolder, position: Int) {
         val destinations = destinationlist[position]
         holder.name.text = destinations.name
-        holder.name.text = destinations.description
+        holder.description.text = destinations.description
 
         holder.btn_edit.setOnClickListener {
             MapsActivity.open(
