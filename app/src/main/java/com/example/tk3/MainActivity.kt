@@ -1,5 +1,6 @@
 package com.example.tk3
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.provider.ContactsContract.Data
@@ -20,42 +21,43 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.tk3.adapter.DestinationListAdapter
 import com.example.tk3.database.DatabaseHelper
+import com.example.tk3.databinding.ActivityMainBinding
 import com.example.tk3.model.DestinationListModel
 import com.example.tk3.ui.theme.Tk3Theme
 
 class MainActivity : AppCompatActivity() {
-    lateinit var recycler_destination: RecyclerView
-    lateinit var btn_add: Button
+
     var destinationlistAdapter: DestinationListAdapter ?= null
     var dbHandler: DatabaseHelper ?= null
     var destinationlist: List<DestinationListModel> = ArrayList<DestinationListModel>()
-    var linearlayoutManager: LinearLayoutManager ?= null
+
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        print("sampai sini 1")
-        recycler_destination = findViewById(R.id.rv_list)
-        btn_add = findViewById(R.id.bt_add_items)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        print("sampai sini 2")
         dbHandler = DatabaseHelper(this)
         fetchlist()
-        print("sampai sini 3")
-        btn_add.setOnClickListener {
-            val i = Intent(applicationContext, AddTask::class.java)
-            startActivity(i)
+
+        binding.btAddItems.setOnClickListener {
+            MapsActivity.open(context = this@MainActivity, mode = MapsActivity.NEW_DATA)
         }
 
-        print("sampai sini 4")
     }
 
     private fun fetchlist() {
         destinationlist = dbHandler!!.getAllDestination()
-        destinationlistAdapter = DestinationListAdapter(destinationlist, applicationContext)
-        linearlayoutManager = LinearLayoutManager(applicationContext)
-        recycler_destination.layoutManager = linearlayoutManager
-        recycler_destination.adapter = destinationlistAdapter
+        destinationlistAdapter = DestinationListAdapter(destinationlist, this@MainActivity)
+        binding.rvList.adapter = destinationlistAdapter
         destinationlistAdapter?.notifyDataSetChanged()
+    }
+
+    companion object{
+
+        fun open(context: Context){
+            context.startActivity(Intent(context, MainActivity::class.java))
+        }
     }
 }

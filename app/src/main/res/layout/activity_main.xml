@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_list"
@@ -9,7 +10,9 @@
         android:layout_height="match_parent"
         android:layout_above="@+id/bt_add_items"
         android:padding="16dp"
-        android:clipToPadding="false" />
+        android:clipToPadding="false"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        android:orientation="vertical"/>
 
     <Button
         android:id="@+id/bt_add_items"

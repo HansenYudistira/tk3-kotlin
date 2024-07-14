@@ -10,6 +10,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.tk3.R
 import com.example.tk3.AddTask
+import com.example.tk3.MapsActivity
 import com.example.tk3.model.DestinationListModel
 import org.w3c.dom.Text
 
@@ -38,12 +39,13 @@ class DestinationListAdapter(destinationlist: List<DestinationListModel>, intern
         holder.name.text = destinations.description
 
         holder.btn_edit.setOnClickListener {
-            val intent = Intent(context, AddTask::class.java).apply {
-                putExtra("Mode", "E")
-                putExtra("Id", destinations.id)
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            }
-            context.startActivity(intent)
+            MapsActivity.open(
+                context = context,
+                mode = MapsActivity.EDIT,
+                destinationId = destinations.id,
+                lat = destinations.latitude,
+                lng = destinations.longitude,
+            )
         }
     }
 

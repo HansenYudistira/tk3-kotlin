@@ -1,124 +1,150 @@
 package com.example.tk3
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat.startActivity
+import com.example.tk3.MapsActivity.Companion.EDIT
 import com.example.tk3.database.DatabaseHelper
+import com.example.tk3.databinding.ActivityAddDestinationBinding
 import com.example.tk3.model.DestinationListModel
-import com.google.android.material.slider.Slider
 
 class AddTask : AppCompatActivity() {
-    lateinit var btn_save: Button
-    lateinit var btn_del: Button
-    lateinit var et_name: EditText
-    lateinit var et_description: EditText
-    lateinit var tv_latitude: TextView
-    lateinit var tv_longitude: TextView
-    lateinit var slider_latitude: Slider
-    lateinit var slider_longitude: Slider
+
     var dbHandler: DatabaseHelper? = null
     var isEditMode: Boolean = false
     var latitude: Double = 0.0
     var longitude: Double = 0.0
+    var destinationId: Int = 0
+
+    private var mode = ""
+
+    private lateinit var binding: ActivityAddDestinationBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_add_destination)
+        binding = ActivityAddDestinationBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        btn_save = findViewById(R.id.btn_save)
-        btn_del = findViewById(R.id.btn_del)
-        et_name = findViewById(R.id.et_name)
-        et_description = findViewById(R.id.et_description)
-        tv_latitude = findViewById(R.id.tv_latitude)
-        tv_longitude = findViewById(R.id.tv_longitude)
-        slider_latitude = findViewById(R.id.slider_latitude)
-        slider_longitude = findViewById(R.id.slider_longitude)
+        getIntentExtra()
 
         dbHandler = DatabaseHelper(this)
 
-        if (intent != null && intent.getStringExtra("Mode") == "E") {
+        if (mode == EDIT) {
             // Update mode
             isEditMode = true
-            btn_save.text = "Update Data"
-            btn_del.visibility = View.VISIBLE
-            val destinations: DestinationListModel = dbHandler!!.getDestination(intent.getIntExtra("Id", 0))
-            et_name.setText(destinations.name)
-            et_description.setText(destinations.description)
-            latitude = destinations.latitude
-            longitude = destinations.longitude
-            slider_latitude.value = (latitude + 90).toFloat()
-            slider_longitude.value = (longitude + 180).toFloat()
+            with(binding) {
+                btnSave.text = "Update Data"
+                btnDel.visibility = View.VISIBLE
+                val destinations: DestinationListModel =
+                    dbHandler!!.getDestination(destinationId)
+                etName.setText(destinations.name)
+                etDescription.setText(destinations.description)
+                if(latitude.isNullOrZero()) latitude = destinations.latitude
+                if(longitude.isNullOrZero()) longitude = destinations.longitude
+            }
         } else {
             // Add mode
             isEditMode = false
-            btn_save.text = "Save Data"
-            btn_del.visibility = View.GONE
-        }
-
-        tv_latitude.text = "Latitude: $latitude"
-        tv_longitude.text = "Longitude: $longitude"
-
-        slider_latitude.addOnChangeListener { slider, value, fromUser ->
-            latitude = value.toDouble() - 90.0 // adjust the range
-            tv_latitude.text = "Latitude: $latitude"
-        }
-
-        slider_longitude.addOnChangeListener { slider, value, fromUser ->
-            longitude = value.toDouble() - 180.0 // adjust the range
-            tv_longitude.text = "Longitude: $longitude"
-        }
-
-        btn_save.setOnClickListener {
-            var success: Boolean = false
-            val destinations: DestinationListModel = DestinationListModel()
-            if (isEditMode) {
-                // Update
-                destinations.id = intent.getIntExtra("Id", 0)
-                destinations.name = et_name.text.toString()
-                destinations.description = et_description.text.toString()
-                destinations.longitude = longitude
-                destinations.latitude = latitude
-
-                success = dbHandler?.updateDestination(destinations) as Boolean
-            } else {
-                // Insert
-                destinations.name = et_name.text.toString()
-                destinations.description = et_description.text.toString()
-                destinations.longitude = longitude
-                destinations.latitude = latitude
-
-                success = dbHandler?.addDestination(destinations) as Boolean
-            }
-            if (success) {
-                val i = Intent(applicationContext, MainActivity::class.java)
-                startActivity(i)
-                finish()
-            } else {
-                Toast.makeText(applicationContext, "Something went wrong!", Toast.LENGTH_LONG).show()
+            with(binding) {
+                btnSave.text = "Save Data"
+                btnDel.visibility = View.GONE
             }
         }
 
-        btn_del.setOnClickListener {
-            val dialog = AlertDialog.Builder(this)
-                .setTitle("Info")
-                .setMessage("Click yes if you want to delete")
-                .setPositiveButton("YES") { dialog, i ->
-                    val success = dbHandler?.deleteDestination(intent.getIntExtra("Id", 0)) as Boolean
-                    if (success) {
-                        finish()
+        with(binding) {
+            tvLatitude.text = "Latitude: $latitude"
+            tvLongitude.text = "Longitude: $longitude"
+
+
+            btnSave.setOnClickListener {
+                var success: Boolean = false
+                val destinations: DestinationListModel = DestinationListModel()
+                if (isEditMode) {
+                    // Update
+                    destinations.id = destinationId
+                    destinations.name = etName.text.toString()
+                    destinations.description = etDescription.text.toString()
+                    destinations.longitude = longitude
+                    destinations.latitude = latitude
+
+                    success = dbHandler?.updateDestination(destinations) as Boolean
+                } else {
+                    // Insert
+                    destinations.name = etName.text.toString()
+                    destinations.description = etDescription.text.toString()
+                    destinations.longitude = longitude
+                    destinations.latitude = latitude
+
+                    success = dbHandler?.addDestination(destinations) as Boolean
+                }
+                if (success) {
+                    finishAffinity()
+                    MainActivity.open(this@AddTask)
+                } else {
+                    Toast.makeText(applicationContext, "Something went wrong!", Toast.LENGTH_LONG)
+                        .show()
+                }
+            }
+
+            btnDel.setOnClickListener {
+                val dialog = AlertDialog.Builder(this@AddTask)
+                    .setTitle("Info")
+                    .setMessage("Click yes if you want to delete")
+                    .setPositiveButton("YES") { dialog, i ->
+                        val success =
+                            dbHandler?.deleteDestination(intent.getIntExtra("Id", 0)) as Boolean
+                        if (success) {
+                            finishAffinity()
+                            MainActivity.open(this@AddTask)
+                        }
+                        dialog.dismiss()
                     }
-                    dialog.dismiss()
-                }
-                .setNegativeButton("No") { dialog, i ->
-                    dialog.dismiss()
-                }
-            dialog.show()
+                    .setNegativeButton("No") { dialog, i ->
+                        dialog.dismiss()
+                    }
+                dialog.show()
+            }
         }
     }
+
+    private fun getIntentExtra() {
+        intent?.let {
+            mode = it.getStringExtra(MODE).toString()
+            latitude = it.getDoubleExtra(LAT_LOCATION, 0.0)
+            longitude = it.getDoubleExtra(LONG_LOCATION, 0.0)
+            destinationId = it.getIntExtra(DESTINATION_ID, 0)
+        }
+    }
+
+    private fun Double.isNullOrZero() = this == null || this == 0.0
+
+    companion object {
+        const val MODE = "MODE"
+        const val EDIT = "EDIT"
+        const val NEW_DATA = "NEW_DATA"
+        const val DESTINATION_ID = "destination_id"
+        const val LAT_LOCATION = "lat_location"
+        const val LONG_LOCATION = "long_location"
+
+        fun open(
+            context: Context,
+            mode: String,
+            destinationId: Int? = null,
+            lat: Double,
+            long: Double
+        ) {
+            val intent = Intent(context, AddTask::class.java)
+            intent.putExtra(LAT_LOCATION, lat)
+            intent.putExtra(LONG_LOCATION, long)
+            intent.putExtra(DESTINATION_ID, destinationId)
+            intent.putExtra(MODE, mode)
+            context.startActivity(intent)
+        }
+    }
+
 }
