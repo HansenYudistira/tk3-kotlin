@@ -43,30 +43,15 @@
         android:layout_height="wrap_content"
         android:text="Latitude: 0.0" />
 
-    <com.google.android.material.slider.Slider
-        android:id="@+id/slider_latitude"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:valueFrom="-90"
-        android:valueTo="90" />
-
     <TextView
         android:id="@+id/tv_longitude"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Longitude: 0.0" />
 
-    <com.google.android.material.slider.Slider
-        android:id="@+id/slider_longitude"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:valueFrom="-180"
-        android:valueTo="180" />
-
     <Button
         android:id="@+id/btn_save"
+        android:layout_marginTop="16dp"
         style="@style/Widget.MaterialComponents.Button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -75,6 +60,7 @@
     <Button
         android:id="@+id/btn_del"
         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_marginTop="16dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Delete Data"
